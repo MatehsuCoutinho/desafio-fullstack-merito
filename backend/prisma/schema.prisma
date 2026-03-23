@@ -1,13 +1,53 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
-  provider = "prisma-client"
-  output   = "../generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
+}
+
+model Fund {
+  id           String        @id @default(uuid())
+  name         String
+  ticker       String        @unique
+  type         String
+  quotaValue   Decimal       @map("quota_value") @db.Decimal(18, 6)
+  createdAt    DateTime      @default(now()) @map("created_at")
+  updatedAt    DateTime      @updatedAt @map("updated_at")
+
+  transactions Transaction[]
+
+  @@map("funds")
+}
+
+model Portfolio {
+  id             String        @id @default(uuid())
+  totalBalance   Decimal       @default(0) @map("total_balance") @db.Decimal(18, 2)
+  createdAt      DateTime      @default(now()) @map("created_at")
+  updatedAt      DateTime      @updatedAt @map("updated_at")
+
+  transactions   Transaction[]
+
+  @@map("portfolios")
+}
+
+model Transaction {
+  id          String          @id @default(uuid())
+  date        DateTime
+  type        TransactionType
+  value       Decimal         @db.Decimal(18, 2)
+  quotas      Decimal         @db.Decimal(18, 6)
+  fundId      String          @map("fund_id")
+  portfolioId String          @map("portfolio_id")
+  createdAt   DateTime        @default(now()) @map("created_at")
+
+  fund        Fund            @relation(fields: [fundId], references: [id])
+  portfolio   Portfolio       @relation(fields: [portfolioId], references: [id])
+
+  @@map("transactions")
+}
+
+enum TransactionType {
+  APORTE
+  RESGATE
 }
