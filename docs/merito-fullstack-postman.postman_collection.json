@@ -1,0 +1,304 @@
+{
+  "info": {
+    "_postman_id": "63d226be-9de1-4332-b964-924575bd0e7b",
+    "name": "merito-fullstack-postman",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "43770093",
+    "_collection_link": "https://go.postman.co/collection/43770093-63d226be-9de1-4332-b964-924575bd0e7b?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Fundos",
+      "item": [
+        {
+          "name": "Criar Fundo",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"ticker\": \"MXRF11\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3333/funds",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3333",
+              "path": [
+                "funds"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Listar fundos",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"name\": \"Fundo Exemplo FI\",\r\n  \"ticker\": \"FIXA11\",\r\n  \"type\": \"Renda Fixa\",\r\n  \"quotaValue\": 10.50\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3333/funds",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3333",
+              "path": [
+                "funds"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Buscar por Id",
+          "request": {
+            "method": "GET",
+            "header": []
+          },
+          "response": []
+        },
+        {
+          "name": "Deletar Fundo",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3333/funds/:id",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3333",
+              "path": [
+                "funds",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Movimentações",
+      "item": [
+        {
+          "name": "Registrar aporte",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"date\": \"2024-03-01\",\r\n  \"type\": \"APORTE\",\r\n  \"value\": 1000,\r\n  \"fundId\": \"91fb54c0-969f-49b5-90d4-a54b7e5baa35\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3333/transactions",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3333",
+              "path": [
+                "transactions"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Listar movimentações",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3333/transactions",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3333",
+              "path": [
+                "transactions"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Ver saldo da carteira",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3333/transactions/portfolio",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3333",
+              "path": [
+                "transactions",
+                "portfolio"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Ver cotas por fundo",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3333/transactions/quotas/:fundId",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3333",
+              "path": [
+                "transactions",
+                "quotas",
+                ":fundId"
+              ],
+              "variable": [
+                {
+                  "key": "fundId",
+                  "value": "91fb54c0-969f-49b5-90d4-a54b7e5baa35"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Registrar resgate",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"date\": \"2024-03-10\",\r\n  \"type\": \"RESGATE\",\r\n  \"value\": 500,\r\n  \"fundId\": \"91fb54c0-969f-49b5-90d4-a54b7e5baa35\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3333/transactions",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3333",
+              "path": [
+                "transactions"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "BRAPI",
+      "item": [
+        {
+          "name": "Buscar fundo imobiliário",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3333/brapi/search/MXRF11",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3333",
+              "path": [
+                "brapi",
+                "search",
+                "MXRF11"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Buscar ação",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3333/brapi/search/PETR4",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3333",
+              "path": [
+                "brapi",
+                "search",
+                "PETR4"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Buscar ETF",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3333/brapi/search/BOVA11",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3333",
+              "path": [
+                "brapi",
+                "search",
+                "BOVA11"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
