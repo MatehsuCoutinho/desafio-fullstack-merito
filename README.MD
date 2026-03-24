@@ -6,13 +6,13 @@ Este projeto foi desenvolvido como parte do desafio técnico da Mérito, com o o
 
 ---
 
-## Sobre o desafio
+## Sobre o projeto
 
 A aplicação permite o gerenciamento de investimentos, incluindo:
 
 * Cadastro de fundos
 * Registro de movimentações (aportes e resgates)
-* Visualização do saldo da carteira
+* Visualização do saldo da carteira em tempo real
 
 O foco principal está em:
 
@@ -62,7 +62,7 @@ O foco principal está em:
 
 ### Fundos de Investimento
 
-* Cadastro com:
+* Cadastro de fundos com:
 
   * Nome
   * Código (ticker)
@@ -71,16 +71,13 @@ O foco principal está em:
 
 ### Movimentações
 
-* Registro de:
-
-  * Aportes
-  * Resgates
-* Dados:
+* Registro de aportes e resgates
+* Dados armazenados:
 
   * Data
   * Valor
-  * Tipo
-* Atualização de:
+  * Tipo (aporte ou resgate)
+* Atualização automática de:
 
   * Quantidade de cotas
   * Saldo da carteira
@@ -93,18 +90,24 @@ O foco principal está em:
 
 ### Integração externa
 
-* Endpoint `/api/brapi` para consumo de dados externos
+* Endpoint `/api/brapi` para consumo de dados externos sobre fundos
 
 ---
 
 ## Como rodar o projeto
 
-### Backend
+O projeto pode ser executado de **duas formas**:
+
+### 1. Rodando localmente (sem Docker)
+
+#### Backend
 
 ```bash
 cd backend
 
 cp .env.example .env
+
+definir suas variáveis de ambiente
 
 npm install
 
@@ -115,15 +118,7 @@ npx prisma db seed
 npm run dev
 ```
 
-Endpoints disponíveis:
-
-* `GET/POST/PUT/DELETE /api/funds`
-* `GET/POST/PUT/DELETE /api/transactions`
-* `GET /api/brapi`
-
----
-
-### Frontend
+#### Frontend
 
 ```bash
 cd frontend
@@ -136,6 +131,18 @@ Acesse: [http://localhost:5173](http://localhost:5173)
 
 ---
 
+### 2. Rodando com Docker
+
+```bash
+cd backend
+docker compose up --build
+```
+
+* O Docker sobe o backend junto com o banco de dados PostgreSQL.
+* O frontend pode ser executado localmente ou você pode adicionar um container adicional, se desejar.
+
+---
+
 ## Testes
 
 ```bash
@@ -143,7 +150,7 @@ cd backend
 npm test
 ```
 
-Arquivos:
+Arquivos de teste:
 
 * `funds.test.ts`
 * `transactions.test.ts`
@@ -158,25 +165,12 @@ O projeto possui uma coleção do Postman disponível na pasta:
 docs/postman_collection.json
 ```
 
-### Como usar:
+### Como usar
 
 1. Abra o Postman
 2. Clique em **Import**
-3. Selecione o arquivo `postman_collection.json` dentro da pasta `docs`
+3. Selecione o arquivo `postman_collection.json`
 4. Execute as requisições disponíveis
-
-Isso facilita testar todos os endpoints da aplicação de forma rápida.
-
----
-
-## Docker
-
-Para subir backend e banco de dados com Docker:
-
-```bash
-cd backend
-docker compose up --build
-```
 
 ---
 
@@ -195,7 +189,7 @@ Etapas:
 * Execução de migrations
 * Execução de testes
 * Build da imagem Docker
-* Simulação de deploy
+* Simulação de deploy (`echo "Deploy"`)
 
 ---
 
@@ -222,14 +216,48 @@ POSTGRES_PASSWORD=
 
 ---
 
-## Entrega
+## Exemplo de uso da API
 
+### Criar fundo
 
-* Repositório: `desafio-fullstack-merito`
-* Projeto pronto para execução local
+```http
+POST /api/funds
+Content-Type: application/json
+
+SEM API EXTERNA:
+
+{
+  "name": "Fundo XP",
+  "ticker": "MXRF11",
+  "type": "Renda Fixa",
+  "cota": 100.50
+}
+
+COM API EXTERNA:
+
+{
+  "ticker": "MXRF11"
+}
+```
+
+### Registrar movimentação
+
+```http
+POST /api/transactions
+Content-Type: application/json
+
+{
+  "date": "2024-03-01",
+  "type": "APORTE",
+  "value": 1000,
+  "fundId": "fund-id"
+}
+```
 
 ---
 
-## Considerações finais
+## Entrega
 
-O projeto foi desenvolvido priorizando organização, legibilidade e boas práticas, com foco na lógica de negócio conforme proposto no desafio.
+* Repositório: `desafio-fullstack-merito`
+* Projeto pronto para execução local ou via Docker
+
