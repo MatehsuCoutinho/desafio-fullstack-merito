@@ -19,21 +19,49 @@ export async function getFundByTicker(ticker: string) {
     });
 }
 
-export async function createFund(ticker: string) {
+// Dados obrigatórios apenas para criação manual
+interface CustomFundData {
+    name: string;
+    ticker: string;
+    type: string;
+    cota: number;
+}
+
+export async function createFund(ticker: string, customData?: CustomFundData) {
     const existing = await getFundByTicker(ticker);
     if (existing) {
         throw new Error(`Fundo com ticker "${ticker.toUpperCase()}" já está cadastrado.`);
     }
 
-    // Busca os dados na BRAPI automaticamente
-    const brapiData = await searchTicker(ticker);
+    // Tenta buscar na BRAPI primeiro
+    const brapiData = await searchTicker(ticker).catch(() => null);
+
+    if (brapiData) {
+        // Fundo encontrado na BRAPI — cria com os dados dela
+        return prisma.fund.create({
+            data: {
+                name: brapiData.name,
+                ticker: brapiData.ticker,
+                type: brapiData.type,
+                quotaValue: brapiData.quotaValue,
+            },
+        });
+    }
+
+    // Não encontrado na BRAPI — exige dados manuais
+    if (!customData) {
+        throw new Error(
+            `Ticker "${ticker.toUpperCase()}" não encontrado na BRAPI. ` +
+            `Forneça os dados manualmente para criar um fundo personalizado.`
+        );
+    }
 
     return prisma.fund.create({
         data: {
-            name: brapiData.name,
-            ticker: brapiData.ticker,
-            type: brapiData.type,
-            quotaValue: brapiData.quotaValue,
+            name: customData.name,
+            ticker: customData.ticker.toUpperCase(),
+            type: customData.type,
+            quotaValue: customData.cota,
         },
     });
 }
@@ -42,8 +70,9 @@ export async function syncFundQuota(id: string) {
     const fund = await getFundById(id);
     if (!fund) throw new Error('Fundo não encontrado.');
 
-    // Busca o valor atualizado da cota na BRAPI
-    const brapiData = await searchTicker(fund.ticker);
+    // Tenta buscar na BRAPI — se falhar, é personalizado, ignora silenciosamente
+    const brapiData = await searchTicker(fund.ticker).catch(() => null);
+    if (!brapiData) return fund;
 
     return prisma.fund.update({
         where: { id },

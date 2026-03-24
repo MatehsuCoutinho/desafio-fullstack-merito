@@ -25,14 +25,18 @@ export async function show(req: Request, res: Response) {
 
 export async function store(req: Request, res: Response) {
     try {
-        const { ticker } = req.body;
+        const { ticker, name, type, cota } = req.body;
 
         if (!ticker) {
             res.status(400).json({ error: 'O campo ticker é obrigatório.' });
             return;
         }
 
-        const fund = await FundService.createFund(ticker);
+        const customData = (name && type && cota)
+            ? { name, ticker, type, cota: Number(cota) }
+            : undefined;
+
+        const fund = await FundService.createFund(ticker, customData);
         res.status(201).json(fund);
     } catch (error: any) {
         res.status(400).json({ error: error.message });
