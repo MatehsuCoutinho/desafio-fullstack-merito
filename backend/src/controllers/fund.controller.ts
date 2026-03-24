@@ -25,15 +25,24 @@ export async function show(req: Request, res: Response) {
 
 export async function store(req: Request, res: Response) {
     try {
-        const { name, ticker, type, quotaValue } = req.body;
+        const { ticker } = req.body;
 
-        if (!name || !ticker || !type || !quotaValue) {
-            res.status(400).json({ error: 'Campos obrigatórios: name, ticker, type, quotaValue.' });
+        if (!ticker) {
+            res.status(400).json({ error: 'O campo ticker é obrigatório.' });
             return;
         }
 
-        const fund = await FundService.createFund({ name, ticker, type, quotaValue });
+        const fund = await FundService.createFund(ticker);
         res.status(201).json(fund);
+    } catch (error: any) {
+        res.status(400).json({ error: error.message });
+    }
+}
+
+export async function sync(req: Request, res: Response) {
+    try {
+        const fund = await FundService.syncFundQuota(req.params.id as string);
+        res.json(fund);
     } catch (error: any) {
         res.status(400).json({ error: error.message });
     }
