@@ -1,0 +1,54 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: ["main"]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      PORT: ${{ secrets.PORT }}
+      BRAPI_TOKEN: ${{ secrets.BRAPI_TOKEN }}
+      POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+
+    steps:
+      # 1. Checkout
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. Setup Node
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      # 3. Install
+      - name: Install dependencies
+        run: npm install
+
+      # 4. Testes
+      - name: Run tests
+        run: npm test
+
+      # 5. Build
+      - name: Build project
+        run: npm run build
+
+      # 6. Criar .env dinamicamente (🔥 importante)
+      - name: Create .env file
+        run: |
+          echo "POSTGRES_PASSWORD=$POSTGRES_PASSWORD" >> .env
+          echo "PORT=$PORT" >> .env
+          echo "BRAPI_TOKEN=$BRAPI_TOKEN" >> .env
+          echo "DATABASE_URL=postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@db:5432/$POSTGRES_DB" >> .env
+
+      # 7. Build Docker
+      - name: Build Docker image
+        run: docker build -t merito-api .
+
+      # 8. Simulação de deploy usando secrets
+      - name: Simulated deploy
+        run: echo "🚀 Deploy com sucesso usando token seguro!"
