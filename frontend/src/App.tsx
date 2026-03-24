@@ -7,13 +7,26 @@ export default function App() {
   return (
     <BrowserRouter>
       <nav style={styles.nav}>
-        <span style={styles.brand}>💼 Mérito Investimentos</span>
-        <div style={styles.links}>
-          <NavLink to="/" style={navStyle} end>Dashboard</NavLink>
-          <NavLink to="/funds" style={navStyle}>Fundos</NavLink>
-          <NavLink to="/transactions" style={navStyle}>Movimentações</NavLink>
+        <div style={styles.navContent}>
+          <div style={styles.brandWrapper}>
+            <span style={styles.brandAccent}>///</span>
+            <span style={styles.brand}>MÉRITO INVESTIMENTOS</span>
+          </div>
+
+          <div style={styles.links}>
+            <NavLink to="/" style={navStyle} end>
+              DASHBOARD
+            </NavLink>
+            <NavLink to="/funds" style={navStyle}>
+              FUNDOS
+            </NavLink>
+            <NavLink to="/transactions" style={navStyle}>
+              MOVIMENTAÇÕES
+            </NavLink>
+          </div>
         </div>
       </nav>
+
       <main style={styles.main}>
         <Routes>
           <Route path="/" element={<DashboardPage />} />
@@ -26,34 +39,71 @@ export default function App() {
 }
 
 const navStyle = ({ isActive }: { isActive: boolean }) => ({
-  color: isActive ? '#fff' : '#ccc',
+  flex: '1 1 120px',
+  textAlign: 'center' as const,
+
+  color: isActive ? '#fff' : '#777',
   textDecoration: 'none',
-  fontWeight: isActive ? 'bold' : 'normal',
-  padding: '4px 8px',
-  borderRadius: '4px',
-  background: isActive ? '#0056b3' : 'transparent',
+  fontSize: '11px',
+  fontWeight: 800,
+  letterSpacing: '0.1em',
+
+  padding: '10px',
+  borderRadius: '3px',
+
+  border: `1px solid ${isActive ? '#C0392B' : '#222'}`,
+  background: isActive ? 'rgba(192,57,43,0.15)' : '#111',
 });
 
-const styles = {
+const styles: Record<string, React.CSSProperties> = {
   nav: {
-    background: '#003580',
-    padding: '12px 24px',
+    background: '#0d0d0d',
+    borderBottom: '1px solid #1e1e1e',
+    padding: '18px 32px',
+  },
+
+  navContent: {
+    maxWidth: '1200px',
+    margin: '0 auto',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
+    flexWrap: 'wrap',
+    gap: '16px',
   },
+
+  brandWrapper: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '10px',
+    flex: '1 1 100%',
+  },
+
+  brandAccent: {
+    color: '#C0392B',
+    fontWeight: '900',
+    fontSize: '18px',
+    letterSpacing: '-1px',
+  },
+
   brand: {
     color: '#fff',
-    fontWeight: 'bold',
-    fontSize: '18px',
+    fontSize: '14px',
+    fontWeight: '900',
+    letterSpacing: '0.12em',
   },
+
   links: {
     display: 'flex',
-    gap: '12px',
+    gap: '8px',
+    flexWrap: 'wrap',
+    width: '100%',
+    justifyContent: 'flex-start',
   },
+
   main: {
-    maxWidth: '960px',
-    margin: '32px auto',
-    padding: '0 16px',
+    maxWidth: '1200px',
+    margin: '0 auto',
+    padding: '0 12px',
   },
 };

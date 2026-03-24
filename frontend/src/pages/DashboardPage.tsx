@@ -31,9 +31,8 @@ export default function DashboardPage() {
         load();
     }, []);
 
-    if (loading) return <p>Carregando...</p>;
+    if (loading) return <p style={{ color: '#aaa', padding: '40px', fontFamily: 'sans-serif' }}>Carregando...</p>;
 
-    // Evolução do saldo ao longo do tempo
     const balanceEvolution = (() => {
         const sorted = [...transactions].sort(
             (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
@@ -48,7 +47,6 @@ export default function DashboardPage() {
         });
     })();
 
-    // Distribuição de cotas por fundo
     const quotasByFund = (() => {
         const map: Record<string, number> = {};
         transactions.forEach((t) => {
@@ -61,7 +59,6 @@ export default function DashboardPage() {
             .map(([name, value]) => ({ name, value: Number(value.toFixed(4)) }));
     })();
 
-    // Aportes vs Resgates por fundo
     const aportesVsResgates = (() => {
         const map: Record<string, { fundo: string; aportes: number; resgates: number }> = {};
         transactions.forEach((t) => {
@@ -73,83 +70,107 @@ export default function DashboardPage() {
         return Object.values(map);
     })();
 
-    const PIE_COLORS = ['#003580', '#0056b3', '#0099cc', '#00bcd4', '#4dd0e1', '#80deea'];
+    const PIE_COLORS = ['#C0392B', '#E74C3C', '#5e5e5e', '#555555', '#888888', '#AAAAAA'];
 
     const formatBRL = (v: number) =>
         v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
+    const tooltipStyle = {
+        backgroundColor: '#1a1a1a',
+        border: '1px solid #333',
+        borderRadius: '4px',
+        color: '#fff',
+        fontSize: '13px',
+    };
+
     return (
-        <div>
-            <h1 style={styles.title}>Dashboard</h1>
+        <div style={styles.page}>
+            <div style={styles.pageHeader}>
+                <span style={styles.pageAccent}>///</span>
+                <h1 style={styles.title}>DASHBOARD</h1>
+            </div>
 
             {/* Cards de resumo */}
             <div style={styles.cardGrid}>
                 <div style={styles.card}>
-                    <p style={styles.cardLabel}>Saldo da Carteira</p>
+                    <p style={styles.cardLabel}>SALDO DA CARTEIRA</p>
                     <p style={styles.cardValue}>
                         {formatBRL(Number(portfolio?.totalBalance ?? 0))}
                     </p>
+                    <div style={styles.cardBar} />
                 </div>
                 <div style={styles.card}>
-                    <p style={styles.cardLabel}>Total de Movimentações</p>
+                    <p style={styles.cardLabel}>TOTAL DE MOVIMENTAÇÕES</p>
                     <p style={styles.cardValue}>{transactions.length}</p>
+                    <div style={styles.cardBar} />
                 </div>
                 <div style={styles.card}>
-                    <p style={styles.cardLabel}>Fundos na Carteira</p>
+                    <p style={styles.cardLabel}>FUNDOS NA CARTEIRA</p>
                     <p style={styles.cardValue}>{funds.length}</p>
+                    <div style={styles.cardBar} />
                 </div>
-                <div style={styles.card}>
-                    <p style={styles.cardLabel}>Total Aportado</p>
-                    <p style={{ ...styles.cardValue, color: '#155724' }}>
+                <div style={{ ...styles.card, ...styles.cardHighlight }}>
+                    <p style={{ ...styles.cardLabel, color: '#aaa' }}>TOTAL APORTADO</p>
+                    <p style={{ ...styles.cardValue, color: '#fff' }}>
                         {formatBRL(
                             transactions
                                 .filter((t) => t.type === 'APORTE')
                                 .reduce((acc, t) => acc + Number(t.value), 0)
                         )}
                     </p>
+                    <div style={{ ...styles.cardBar, background: '#fff' }} />
                 </div>
             </div>
 
             {transactions.length === 0 ? (
                 <div style={styles.empty}>
-                    <p>Nenhuma movimentação ainda. Cadastre um fundo e faça um aporte!</p>
+                    <p style={{ color: '#888', letterSpacing: '0.05em' }}>
+                        NENHUMA MOVIMENTAÇÃO AINDA — CADASTRE UM FUNDO E FAÇA UM APORTE.
+                    </p>
                 </div>
             ) : (
                 <>
                     {/* Gráfico de evolução do saldo */}
                     <div style={styles.chartCard}>
-                        <h2 style={styles.chartTitle}>Evolução do Saldo</h2>
+                        <h2 style={styles.chartTitle}>
+                            <span style={styles.chartAccent}>—</span> EVOLUÇÃO DO SALDO
+                        </h2>
                         <ResponsiveContainer width="100%" height={280}>
                             <LineChart data={balanceEvolution}>
-                                <CartesianGrid strokeDasharray="3 3" stroke="#eee" />
-                                <XAxis dataKey="date" tick={{ fontSize: 12 }} />
+                                <CartesianGrid strokeDasharray="3 3" stroke="#2a2a2a" />
+                                <XAxis dataKey="date" tick={{ fontSize: 11, fill: '#888', fontFamily: 'sans-serif' }} axisLine={{ stroke: '#333' }} tickLine={false} />
                                 <YAxis
-                                    tick={{ fontSize: 12 }}
+                                    tick={{ fontSize: 11, fill: '#888', fontFamily: 'sans-serif' }}
                                     tickFormatter={(v) =>
                                         v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
                                     }
-                                    width={100}
+                                    width={110}
+                                    axisLine={{ stroke: '#333' }}
+                                    tickLine={false}
                                 />
                                 <Tooltip
-                                    formatter={(v) => formatBRL(Number(v ?? 0))} labelStyle={{ fontWeight: 'bold' }}
+                                    contentStyle={tooltipStyle}
+                                    formatter={(v) => formatBRL(Number(v ?? 0))}
+                                    labelStyle={{ fontWeight: 'bold', color: '#C0392B' }}
                                 />
                                 <Line
                                     type="monotone"
                                     dataKey="saldo"
-                                    stroke="#003580"
+                                    stroke="#C0392B"
                                     strokeWidth={2}
-                                    dot={{ r: 4, fill: '#003580' }}
-                                    activeDot={{ r: 6 }}
+                                    dot={{ r: 4, fill: '#C0392B', strokeWidth: 0 }}
+                                    activeDot={{ r: 6, fill: '#E74C3C' }}
                                 />
                             </LineChart>
                         </ResponsiveContainer>
                     </div>
 
                     <div style={styles.chartsRow}>
-                        {/* Gráfico de pizza — distribuição de cotas */}
                         {quotasByFund.length > 0 && (
                             <div style={{ ...styles.chartCard, flex: 1 }}>
-                                <h2 style={styles.chartTitle}>Distribuição de Cotas por Fundo</h2>
+                                <h2 style={styles.chartTitle}>
+                                    <span style={styles.chartAccent}>—</span> DISTRIBUIÇÃO DE COTAS
+                                </h2>
                                 <ResponsiveContainer width="100%" height={280}>
                                     <PieChart>
                                         <Pie
@@ -162,40 +183,47 @@ export default function DashboardPage() {
                                             label={({ name, percent }) =>
                                                 `${name} ${(percent! * 100).toFixed(1)}%`
                                             }
+                                            labelLine={{ stroke: '#555' }}
                                         >
                                             {quotasByFund.map((_, i) => (
-                                                <Cell
-                                                    key={i}
-                                                    fill={PIE_COLORS[i % PIE_COLORS.length]}
-                                                />
+                                                <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
                                             ))}
                                         </Pie>
-                                        <Tooltip formatter={(value) => `${Number(value ?? 0).toFixed(4)} cotas`} />
-                                        <Legend />
+                                        <Tooltip
+                                            contentStyle={tooltipStyle}
+                                            formatter={(value) => `${Number(value ?? 0).toFixed(4)} cotas`}
+                                        />
+                                        <Legend wrapperStyle={{ fontSize: '12px', color: '#aaa' }} />
                                     </PieChart>
                                 </ResponsiveContainer>
                             </div>
                         )}
 
-                        {/* Gráfico de barras — aportes vs resgates */}
                         {aportesVsResgates.length > 0 && (
                             <div style={{ ...styles.chartCard, flex: 1 }}>
-                                <h2 style={styles.chartTitle}>Aportes vs Resgates por Fundo</h2>
+                                <h2 style={styles.chartTitle}>
+                                    <span style={styles.chartAccent}>—</span> APORTES VS RESGATES
+                                </h2>
                                 <ResponsiveContainer width="100%" height={280}>
                                     <BarChart data={aportesVsResgates}>
-                                        <CartesianGrid strokeDasharray="3 3" stroke="#eee" />
-                                        <XAxis dataKey="fundo" tick={{ fontSize: 12 }} />
+                                        <CartesianGrid strokeDasharray="3 3" stroke="#2a2a2a" />
+                                        <XAxis dataKey="fundo" tick={{ fontSize: 11, fill: '#888' }} axisLine={{ stroke: '#333' }} tickLine={false} />
                                         <YAxis
-                                            tick={{ fontSize: 12 }}
+                                            tick={{ fontSize: 11, fill: '#888' }}
                                             tickFormatter={(v) =>
                                                 v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
                                             }
-                                            width={100}
+                                            width={110}
+                                            axisLine={{ stroke: '#333' }}
+                                            tickLine={false}
                                         />
-                                        <Tooltip formatter={(value) => formatBRL(Number(value ?? 0))} />
-                                        <Legend />
-                                        <Bar dataKey="aportes" name="Aportes" fill="#003580" radius={[4, 4, 0, 0]} />
-                                        <Bar dataKey="resgates" name="Resgates" fill="#dc3545" radius={[4, 4, 0, 0]} />
+                                        <Tooltip
+                                            contentStyle={tooltipStyle}
+                                            formatter={(value) => formatBRL(Number(value ?? 0))}
+                                        />
+                                        <Legend wrapperStyle={{ fontSize: '12px', color: '#aaa' }} />
+                                        <Bar dataKey="aportes" name="Aportes" fill="#C0392B" radius={[3, 3, 0, 0]} />
+                                        <Bar dataKey="resgates" name="Resgates" fill="#555" radius={[3, 3, 0, 0]} />
                                     </BarChart>
                                 </ResponsiveContainer>
                             </div>
@@ -203,41 +231,47 @@ export default function DashboardPage() {
                     </div>
 
                     {/* Tabela de movimentações */}
-                    <h2 style={styles.subtitle}>Últimas Movimentações</h2>
-                    <table style={styles.table}>
-                        <thead>
-                            <tr>
-                                <th style={styles.th}>Data</th>
-                                <th style={styles.th}>Fundo</th>
-                                <th style={styles.th}>Ticker</th>
-                                <th style={styles.th}>Tipo</th>
-                                <th style={styles.th}>Valor</th>
-                                <th style={styles.th}>Cotas</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {transactions.map((t) => (
-                                <tr key={t.id} style={styles.tr}>
-                                    <td style={styles.td}>
-                                        {new Date(t.date).toLocaleDateString('pt-BR')}
-                                    </td>
-                                    <td style={styles.td}>{t.fund.name}</td>
-                                    <td style={styles.td}>{t.fund.ticker}</td>
-                                    <td style={styles.td}>
-                                        <span style={{
-                                            ...styles.badge,
-                                            background: t.type === 'APORTE' ? '#d4edda' : '#f8d7da',
-                                            color: t.type === 'APORTE' ? '#155724' : '#721c24',
-                                        }}>
-                                            {t.type}
-                                        </span>
-                                    </td>
-                                    <td style={styles.td}>{formatBRL(Number(t.value))}</td>
-                                    <td style={styles.td}>{Number(t.quotas).toFixed(4)}</td>
+                    <div style={styles.tableHeader}>
+                        <span style={styles.chartAccent}>—</span>
+                        <h2 style={styles.subtitle}>ÚLTIMAS MOVIMENTAÇÕES</h2>
+                    </div >
+                    <div style={styles.tableWrapper}>
+                        <table style={styles.table}>
+                            <thead>
+                                <tr>
+                                    <th style={styles.th}>DATA</th>
+                                    <th style={styles.th}>FUNDO</th>
+                                    <th style={styles.th}>TICKER</th>
+                                    <th style={styles.th}>TIPO</th>
+                                    <th style={styles.th}>VALOR</th>
+                                    <th style={styles.th}>COTAS</th>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                {transactions.map((t) => (
+                                    <tr key={t.id} style={styles.tr}>
+                                        <td style={styles.td}>
+                                            {new Date(t.date).toLocaleDateString('pt-BR')}
+                                        </td>
+                                        <td style={styles.td}>{t.fund.name}</td>
+                                        <td style={{ ...styles.td, fontWeight: 'bold', color: '#fff' }}>{t.fund.ticker}</td>
+                                        <td style={styles.td}>
+                                            <span style={{
+                                                ...styles.badge,
+                                                background: t.type === 'APORTE' ? 'rgba(192,57,43,0.15)' : 'rgba(80,80,80,0.3)',
+                                                color: t.type === 'APORTE' ? '#E74C3C' : '#aaa',
+                                                border: `1px solid ${t.type === 'APORTE' ? '#C0392B' : '#444'}`,
+                                            }}>
+                                                {t.type}
+                                            </span>
+                                        </td>
+                                        <td style={styles.td}>{formatBRL(Number(t.value))}</td>
+                                        <td style={{ ...styles.td, color: '#888' }}>{Number(t.quotas).toFixed(4)}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
                 </>
             )}
         </div>
@@ -245,19 +279,177 @@ export default function DashboardPage() {
 }
 
 const styles: Record<string, React.CSSProperties> = {
-    title: { marginBottom: '24px' },
-    subtitle: { margin: '32px 0 16px' },
-    cardGrid: { display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '24px' },
-    card: { background: '#fff', borderRadius: '8px', padding: '20px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' },
-    cardLabel: { fontSize: '13px', color: '#666', marginBottom: '8px' },
-    cardValue: { fontSize: '24px', fontWeight: 'bold', color: '#003580' },
-    chartCard: { background: '#fff', borderRadius: '8px', padding: '24px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)', marginBottom: '24px' },
-    chartTitle: { fontSize: '16px', fontWeight: 'bold', marginBottom: '16px', color: '#333' },
-    chartsRow: { display: 'flex', gap: '24px', marginBottom: '0' },
-    empty: { background: '#fff', borderRadius: '8px', padding: '40px', textAlign: 'center', color: '#666', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' },
-    table: { width: '100%', borderCollapse: 'collapse', background: '#fff', borderRadius: '8px', overflow: 'hidden', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' },
-    th: { background: '#003580', color: '#fff', padding: '12px', textAlign: 'left' as const, fontSize: '14px' },
-    tr: { borderBottom: '1px solid #eee' },
-    td: { padding: '12px', fontSize: '14px' },
-    badge: { padding: '4px 8px', borderRadius: '4px', fontSize: '12px', fontWeight: 'bold' },
+  page: {
+    background: '#0B0B0C',
+    minHeight: '100vh',
+    padding: '16px',
+    fontFamily: "'Helvetica Neue', Arial, sans-serif",
+  },
+
+  pageHeader: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '12px',
+    marginBottom: '24px',
+    flexWrap: 'wrap',
+  },
+
+  pageAccent: {
+    color: '#E5484D',
+    fontSize: '20px',
+    fontWeight: '900',
+    letterSpacing: '-1px',
+  },
+
+  title: {
+    fontSize: 'clamp(20px, 4vw, 28px)',
+    fontWeight: '900',
+    color: '#FFFFFF',
+    letterSpacing: '0.1em',
+    margin: 0,
+  },
+
+  subtitle: {
+    fontSize: '16px',
+    fontWeight: '800',
+    color: '#FFFFFF',
+    letterSpacing: '0.1em',
+    margin: 0,
+  },
+
+  tableHeader: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '10px',
+    margin: '32px 0 16px',
+    flexWrap: 'wrap',
+  },
+
+  tableWrapper: {
+    width: '100%',
+    overflowX: 'auto',
+  },
+
+  cardGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
+    gap: '12px',
+  },
+
+  card: {
+    background: '#141416',
+    borderRadius: '6px',
+    padding: '16px',
+    border: '1px solid #26262A',
+    position: 'relative',
+    transition: 'all 0.2s ease',
+  },
+
+  cardHighlight: {
+    background: '#1A1A1D',
+    border: '1px solid #E5484D',
+  },
+
+  cardBar: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    width: '40px',
+    height: '3px',
+    background: '#E5484D',
+  },
+
+  cardLabel: {
+    fontSize: '11px',
+    color: '#71717A',
+    marginBottom: '8px',
+    letterSpacing: '0.12em',
+    fontWeight: '600',
+  },
+
+  cardValue: {
+    fontSize: 'clamp(18px, 5vw, 24px)',
+    fontWeight: '900',
+    color: '#FFFFFF',
+  },
+
+  chartCard: {
+    background: '#141416',
+    borderRadius: '6px',
+    padding: '16px',
+    border: '1px solid #26262A',
+    marginBottom: '20px',
+    flex: '1 1 100%',
+  },
+
+  chartTitle: {
+    fontSize: '13px',
+    fontWeight: '800',
+    marginBottom: '16px',
+    color: '#FFFFFF',
+    letterSpacing: '0.12em',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '10px',
+  },
+
+  chartAccent: {
+    color: '#E5484D',
+    fontWeight: '900',
+    fontSize: '16px',
+  },
+
+  chartsRow: {
+    display: 'flex',
+    gap: '16px',
+    flexWrap: 'wrap',
+  },
+
+  empty: {
+    background: '#141416',
+    borderRadius: '6px',
+    padding: '40px',
+    textAlign: 'center',
+    border: '1px solid #26262A',
+    color: '#71717A',
+  },
+
+  table: {
+    width: '100%',
+    borderCollapse: 'collapse',
+    background: '#141416',
+    borderRadius: '6px',
+    overflow: 'hidden',
+    border: '1px solid #26262A',
+    minWidth: '600px',
+  },
+
+  th: {
+    background: '#101012',
+    color: '#71717A',
+    padding: '12px',
+    textAlign: 'left' as const,
+    fontSize: '11px',
+    letterSpacing: '0.1em',
+    fontWeight: '700',
+    borderBottom: '1px solid #26262A',
+  },
+
+  tr: {
+    borderBottom: '1px solid #1F1F23',
+  },
+
+  td: {
+    padding: '12px',
+    fontSize: '13px',
+    color: '#A1A1AA',
+  },
+
+  badge: {
+    padding: '4px 10px',
+    borderRadius: '4px',
+    fontSize: '11px',
+    fontWeight: '700',
+    letterSpacing: '0.08em',
+  },
 };
