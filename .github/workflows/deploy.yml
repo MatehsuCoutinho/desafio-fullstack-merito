@@ -29,6 +29,10 @@ jobs:
       BRAPI_TOKEN: ${{ secrets.BRAPI_TOKEN }}
       PORT: 3333
 
+    defaults:
+      run:
+        working-directory: backend
+
     steps:
       - name: Checkout do código
         uses: actions/checkout@v4
