@@ -32,7 +32,7 @@ export async function store(req: Request, res: Response) {
     try {
         const { date, type, value, fundId } = req.body;
 
-        if (!date || !type || !value || !fundId) {
+        if (!date || !type || value === undefined || value === null || !fundId) {
             res.status(400).json({ error: 'Campos obrigatórios: date, type, value, fundId.' });
             return;
         }
