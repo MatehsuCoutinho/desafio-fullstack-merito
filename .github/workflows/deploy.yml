@@ -2,7 +2,7 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches: [master]
+    branches: [main]
   pull_request:
 
 jobs:
@@ -14,7 +14,7 @@ jobs:
         image: postgres:15
         env:
           POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          POSTGRES_PASSWORD: postgres
           POSTGRES_DB: merito_test
         ports:
           - 5432:5432
@@ -25,7 +25,7 @@ jobs:
           --health-retries=5
 
     env:
-      DATABASE_URL:  ${{ secrets.DATABASE_URL }}
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/merito_test
       BRAPI_TOKEN: ${{ secrets.BRAPI_TOKEN }}
       PORT: 3333
 
