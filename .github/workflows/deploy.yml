@@ -33,15 +33,19 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      # 4. Testes
+      # 4. Gera Prisma Client
+      - name: Generate Prisma Client
+        run: npx prisma generate
+
+      # 5. Testes
       - name: Run tests
         run: npm test
 
-      # 5. Build
+      # 6. Build
       - name: Build project
         run: npm run build
 
-      # 6. Criar .env dinamicamente (🔥 importante)
+      # 7. Criar .env dinamicamente (🔥 importante)
       - name: Create .env file
         run: |
           echo "POSTGRES_PASSWORD=$POSTGRES_PASSWORD" >> .env
@@ -49,10 +53,10 @@ jobs:
           echo "BRAPI_TOKEN=$BRAPI_TOKEN" >> .env
           echo "DATABASE_URL=postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@db:5432/$POSTGRES_DB" >> .env
 
-      # 7. Build Docker
+      # 8. Build Docker
       - name: Build Docker image
         run: docker build -t merito-api .
 
-      # 8. Simulação de deploy usando secrets
+      # 9. Simulação de deploy usando secrets
       - name: Simulated deploy
         run: echo "🚀 Deploy com sucesso usando token seguro!"
