@@ -2,61 +2,74 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches: ["master"]
+    branches: [main]
+  pull_request:
+    branches: [main]
 
 jobs:
-  build-and-deploy:
+  test:
+    name: Run Tests
     runs-on: ubuntu-latest
 
-    defaults:
-      run:
-        working-directory: backend
-
-    env:
-      DATABASE_URL: ${{ secrets.DATABASE_URL }}
-      PORT: ${{ secrets.PORT }}
-      BRAPI_TOKEN: ${{ secrets.BRAPI_TOKEN }}
-      POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: merito_db_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
     steps:
-      # 1. Checkout
-      - name: Checkout repository
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      # 2. Setup Node
-      - name: Setup Node
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
 
-      # 3. Install
       - name: Install dependencies
-        run: npm install
+        working-directory: backend
+        run: npm ci
 
-      # 4. Gera Prisma Client
       - name: Generate Prisma Client
+        working-directory: backend
         run: npx prisma generate
 
-      # 5. Testes
+      - name: Run migrations
+        working-directory: backend
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: npx prisma migrate deploy
+
       - name: Run tests
+        working-directory: backend
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          BRAPI_TOKEN: ${{ secrets.BRAPI_TOKEN }}
         run: npm test
 
-      # 6. Build
-      - name: Build project
-        run: npm run build
+  build:
+    name: Build Docker Image
+    runs-on: ubuntu-latest
+    needs: test
 
-      # 7. Criar .env dinamicamente (🔥 importante)
-      - name: Create .env file
-        run: |
-          echo "POSTGRES_PASSWORD=$POSTGRES_PASSWORD" >> .env
-          echo "PORT=$PORT" >> .env
-          echo "BRAPI_TOKEN=$BRAPI_TOKEN" >> .env
-          echo "DATABASE_URL=postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@db:5432/$POSTGRES_DB" >> .env
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      # 8. Build Docker
       - name: Build Docker image
-        run: docker build -t merito-api .
+        working-directory: backend
+        run: docker build -t desafio-fullstack-merito-backend .
 
-      # 9. Simulação de deploy usando secrets
-      - name: Simulated deploy
-        run: echo "🚀 Deploy com sucesso usando token seguro!"
+      - name: Simulate deploy
+        run: echo "✅ Deploy simulado com sucesso!"
