@@ -61,7 +61,7 @@ export async function createFund(ticker: string, customData?: CustomFundData) {
             name: customData.name,
             ticker: customData.ticker.toUpperCase(),
             type: customData.type,
-            quotaValue: customData.cota,
+            quotaValue: customData.cota || 10.50, 
         },
     });
 }

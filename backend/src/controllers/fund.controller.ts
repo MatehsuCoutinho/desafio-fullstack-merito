@@ -25,15 +25,20 @@ export async function show(req: Request, res: Response) {
 
 export async function store(req: Request, res: Response) {
     try {
-        const { ticker, name, type, cota } = req.body;
+        const { ticker, name, type } = req.body;  // remove cota do destructuring
 
         if (!ticker) {
             res.status(400).json({ error: 'O campo ticker é obrigatório.' });
             return;
         }
 
-        const customData = (name && type && cota)
-            ? { name, ticker, type, cota: Number(cota) }
+        const customData = (name && type)
+            ? {
+                name,
+                ticker,
+                type,
+                cota: 10.50 // valor padrão
+            }
             : undefined;
 
         const fund = await FundService.createFund(ticker, customData);
