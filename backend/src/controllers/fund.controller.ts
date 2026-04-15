@@ -25,7 +25,7 @@ export async function show(req: Request, res: Response) {
 
 export async function store(req: Request, res: Response) {
     try {
-        const { ticker, name, type } = req.body;  // remove cota do destructuring
+        const { ticker, name, type, cota } = req.body;
 
         if (!ticker) {
             res.status(400).json({ error: 'O campo ticker é obrigatório.' });
@@ -37,7 +37,7 @@ export async function store(req: Request, res: Response) {
                 name,
                 ticker,
                 type,
-                cota: 10.50 // valor padrão
+                cota: cota ? Number(cota) : 10.50,
             }
             : undefined;
 

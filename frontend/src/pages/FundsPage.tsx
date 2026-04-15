@@ -6,6 +6,10 @@ export default function FundsPage() {
     const [funds, setFunds] = useState<Fund[]>([]);
     const [ticker, setTicker] = useState('');
     const [preview, setPreview] = useState<BrapiSearchResult | null>(null);
+    const [manualMode, setManualMode] = useState(false);
+    const [manualName, setManualName] = useState('');
+    const [manualType, setManualType] = useState('');
+    const [manualCota, setManualCota] = useState('');
     const [loading, setLoading] = useState(false);
     const [searching, setSearching] = useState(false);
     const [error, setError] = useState('');
@@ -23,26 +27,50 @@ export default function FundsPage() {
         setSearching(true);
         setError('');
         setPreview(null);
+        setManualMode(false);
+        setManualName('');
+        setManualType('');
+        setManualCota('');
         try {
             const res = await api.get(`/brapi/search/${ticker.toUpperCase()}`);
             setPreview(res.data);
         } catch (e: any) {
-            setError(e.response?.data?.error ?? 'Ticker não encontrado.');
+            setError('Ticker não encontrado na BRAPI. Preencha os dados manualmente para cadastrá-lo.');
+            setManualMode(true);
         } finally {
             setSearching(false);
         }
     }
 
     async function handleAdd() {
-        if (!preview) return;
+        if (!preview && !manualMode) return;
         setLoading(true);
         setError('');
         setSuccess('');
         try {
-            await api.post('/funds', { ticker: preview.ticker });
-            setSuccess(`Fundo ${preview.ticker} cadastrado com sucesso!`);
+            if (preview) {
+                await api.post('/funds', { ticker: preview.ticker });
+                setSuccess(`Fundo ${preview.ticker} cadastrado com sucesso!`);
+                setPreview(null);
+            } else {
+                if (!manualName.trim() || !manualType.trim() || !manualCota) {
+                    setError('Preencha nome, tipo e valor da cota.');
+                    setLoading(false);
+                    return;
+                }
+                await api.post('/funds', {
+                    ticker: ticker.toUpperCase(),
+                    name: manualName,
+                    type: manualType,
+                    cota: Number(manualCota),
+                });
+                setSuccess(`Fundo ${ticker.toUpperCase()} cadastrado com sucesso!`);
+                setManualMode(false);
+                setManualName('');
+                setManualType('');
+                setManualCota('');
+            }
             setTicker('');
-            setPreview(null);
             loadFunds();
         } catch (e: any) {
             setError(e.response?.data?.error ?? 'Erro ao cadastrar fundo.');
@@ -98,6 +126,49 @@ export default function FundsPage() {
 
                 {error && <p style={styles.error}>⚠ {error}</p>}
                 {success && <p style={styles.success}>✓ {success}</p>}
+
+                {manualMode && (
+                    <div style={styles.preview}>
+                        <p style={{ color: '#666', fontSize: '11px', marginBottom: '12px', letterSpacing: '0.05em' }}>
+                            CADASTRO MANUAL — TICKER: <span style={{ color: '#fff' }}>{ticker.toUpperCase()}</span>
+                        </p>
+                        <div style={styles.manualGrid}>
+                            <div style={styles.manualField}>
+                                <label style={styles.manualLabel}>NOME DO FUNDO</label>
+                                <input
+                                    style={styles.input}
+                                    placeholder="Ex: Maxi Renda FII"
+                                    value={manualName}
+                                    onChange={(e) => setManualName(e.target.value)}
+                                />
+                            </div>
+                            <div style={styles.manualField}>
+                                <label style={styles.manualLabel}>TIPO</label>
+                                <input
+                                    style={styles.input}
+                                    placeholder="Ex: Fundo Imobiliário, Ações..."
+                                    value={manualType}
+                                    onChange={(e) => setManualType(e.target.value)}
+                                />
+                            </div>
+                            <div style={styles.manualField}>
+                                <label style={styles.manualLabel}>VALOR DA COTA (R$)</label>
+                                <input
+                                    style={styles.input}
+                                    placeholder="Ex: 10.50"
+                                    type="number"
+                                    min="0.01"
+                                    step="0.01"
+                                    value={manualCota}
+                                    onChange={(e) => setManualCota(e.target.value)}
+                                />
+                            </div>
+                        </div>
+                        <button style={styles.btnAdd} onClick={handleAdd} disabled={loading}>
+                            {loading ? 'CADASTRANDO...' : '+ CADASTRAR FUNDO MANUALMENTE'}
+                        </button>
+                    </div>
+                )}
 
                 {preview && (
                     <div style={styles.preview}>
@@ -323,6 +394,25 @@ const styles: Record<string, React.CSSProperties> = {
 
     error: { color: '#E74C3C' },
     success: { color: '#27AE60' },
+
+    manualGrid: {
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+        gap: '12px',
+        marginBottom: '4px',
+    },
+
+    manualField: {
+        display: 'flex',
+        flexDirection: 'column' as const,
+        gap: '6px',
+    },
+
+    manualLabel: {
+        fontSize: '10px',
+        color: '#666',
+        letterSpacing: '0.08em',
+    },
 
     table: {
         width: '100%',
