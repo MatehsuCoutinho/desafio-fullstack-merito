@@ -104,7 +104,7 @@ npm install
 
 npx prisma migrate dev
 
-npx prisma db seed
+npm run seed
 
 npm run dev
 ```
@@ -231,7 +231,7 @@ POST /api/transactions
 Content-Type: application/json
 
 {
-  "date": "2024-03-01",
+  "date": "2026-03-01",
   "type": "APORTE",
   "value": 1000,
   "fundId": "fund-uuid"
